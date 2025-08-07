@@ -72,5 +72,30 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+const registerUser = async (req, res) => {
+  const { nom, prenom, email, mdp, adresse, statut, role } = req.body;
 
-module.exports = { getUsers, createUser, updateUser, deleteUser };
+  try {
+    const hashedPassword = await bcrypt.hash(mdp, 10);
+    const user = new User({
+      nom,
+      prenom,
+      email,
+      mdp: hashedPassword,
+      adresse,
+      statut,
+      role: "client",
+    });
+    await user.save();
+    const token = jwt.sign(
+      { id: user._id, role: user.role, nom: user.nom },
+      process.env.JWT_SECRET
+    );
+    res.status(201).json({ token, user: user });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Erreur lors de la création", error: error.message });
+  }
+};
+module.exports = { getUsers, createUser, updateUser, deleteUser, registerUser };
