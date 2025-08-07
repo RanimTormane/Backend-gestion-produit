@@ -7,16 +7,23 @@ const {
   createUser,
   updateUser,
   deleteUser,
+  registerUser,
 } = require("../controllers/userController");
 
-router.get(
-  "/users",
+router.get("/users", authenticateToken, authorizeRole("admin"), getUsers);
+router.post("/create", authenticateToken, authorizeRole("admin"), createUser);
+router.post("/register", registerUser);
+router.put(
+  "/update/:id",
   authenticateToken,
-  authorizeRole("client", "admin"),
-  getUsers
+  authorizeRole("admin"),
+  updateUser
 );
-router.post("/register", createUser);
-router.put("/update/:id", updateUser);
-router.delete("/delete/:id", deleteUser);
+router.delete(
+  "/delete/:id",
+  authenticateToken,
+  authorizeRole("admin"),
+  deleteUser
+);
 
 module.exports = router;
